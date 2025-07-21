@@ -1,6 +1,7 @@
 import json
-from pathlib import Path
 import os
+import random
+from pathlib import Path
 import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,7 +17,7 @@ app = FastAPI()
 # ✅ Enable CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can replace with ["http://localhost:5500"] for specific frontend origin
+    allow_origins=["*"],  # Update this to specific domain if needed
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,16 +36,20 @@ with open(DATA_PATH, "r", encoding="utf-8") as f:
 class MessageInput(BaseModel):
     messages: list[str]
 
-# ✅ Check if message is relevant
+# ✅ Friendly fallback responses for irrelevant inputs
+FALLBACK_RESPONSES = [
+    "I might not be great with that, but ask me anything about visas!",
+    "Let’s stick to visa support — ask me anything on that!",
+]
+
+# ✅ Relevance check
 def is_relevant(message: str):
     friendly_openers = ["hello", "hi", "hey", "how are you", "good morning", "good evening", "thank you"]
     visa_keywords = ["visa", "apply", "application", "document", "canada", "sop", "deadline", "graduate", "dtv"]
-
     message_lower = message.lower()
     return any(kw in message_lower for kw in visa_keywords + friendly_openers)
 
-
-# ✅ Detect high interest
+# ✅ Interest detection
 def detect_interest(messages: list[str]):
     interest_keywords = ["ready", "apply now", "send documents", "next step", "book a call", "how soon"]
     for msg in messages[-3:]:
@@ -52,7 +57,7 @@ def detect_interest(messages: list[str]):
             return True
     return False
 
-# ✅ Build prompt using few-shot examples
+# ✅ Prompt builder using few-shot learning
 def build_few_shot_prompt(latest_message: str):
     examples = []
     for convo_id, convo in conversations_data.items():
@@ -80,19 +85,22 @@ async def respond(input: MessageInput):
     try:
         latest_message = input.messages[-1]
 
+        # ❌ If not relevant, send a casual fallback
         if not is_relevant(latest_message):
-            return {"reply": None, "high_interest": False}
+            fallback_reply = random.choice(FALLBACK_RESPONSES)
+            return {"reply": fallback_reply, "high_interest": False}
 
+        # ✅ Build few-shot prompt
         prompt = build_few_shot_prompt(latest_message)
 
         headers = {
             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "HTTP-Referer": "https://yourdomain.com",  # Replace with your domain or leave blank during dev
+            "HTTP-Referer": "https://yourdomain.com",  # Optional
             "X-Title": "VisaBot Assistant"
         }
 
         payload = {
-            "model": "openai/gpt-3.5-turbo",  # You can change this if needed
+            "model": "openai/gpt-3.5-turbo",
             "messages": [
                 {"role": "system", "content": "You are a helpful visa support assistant."},
                 {"role": "user", "content": prompt}
@@ -101,6 +109,7 @@ async def respond(input: MessageInput):
             "max_tokens": 300
         }
 
+        # ✅ Send request to OpenRouter
         async with httpx.AsyncClient() as client:
             response = await client.post(OPENROUTER_API_URL, json=payload, headers=headers)
             response.raise_for_status()
