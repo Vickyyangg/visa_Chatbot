@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visa Support Chatbot - Dark Mobile UI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="chat-container" role="main" aria-label="Visa Support Center">
+    <header class="chat-header">
+      <button id="clearBtn" aria-label="Clear chat">&times;</button>
+      <span class="chat-title">This is Vicky from Issa</span>
+    </header>
+
+    <div id="chat" aria-live="polite" aria-relevant="additions"></div>
+
+    <form id="inputForm" class="input-area" autocomplete="off" aria-label="Send a message">
+      <input
+        type="text"
+        id="messageInput"
+        placeholder="Type your message..."
+        required
+        aria-required="true"
+        aria-describedby="sendBtn"
+      />
+      <button id="sendBtn" type="submit" aria-label="Send message">Send</button>
+    </form>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

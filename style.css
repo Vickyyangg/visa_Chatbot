@@ -1,0 +1,140 @@
+body {
+  margin: 0;
+  background-color: #121212;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: white;
+}
+
+.chat-container {
+  background-color: #1e1e1e;
+  width: 375px;
+  height: 650px;
+  border-radius: 30px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-header {
+  position: relative;
+  padding: 20px;
+  background-color: #272727;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #333;
+  user-select: none;
+}
+
+.chat-title {
+  font-weight: normal;
+  font-size: 1rem;
+}
+
+#clearBtn {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+#clearBtn:hover {
+  color: #ff5555;
+}
+
+#chat {
+  flex-grow: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+}
+
+.message {
+  max-width: 75%;
+  padding: 12px 18px;
+  border-radius: 20px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  position: relative;
+  font-size: 1rem;
+}
+
+.user {
+  background: linear-gradient(135deg, #4a90e2, #357ABD);
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+  box-shadow: 0 2px 8px rgba(53,122,189,0.4);
+}
+
+.bot {
+  background-color: #2a2a2a;
+  color: #ccc;
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+
+.timestamp {
+  font-size: 0.65rem;
+  color: #e0e0e0;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.input-area {
+  padding: 15px 20px;
+  background-color: #272727;
+  border-top: 1px solid #333;
+  display: flex;
+  gap: 10px;
+}
+
+.input-area input[type="text"] {
+  flex-grow: 1;
+  padding: 12px 15px;
+  border-radius: 25px;
+  border: none;
+  background-color: #1e1e1e;
+  color: white;
+  font-size: 1rem;
+}
+.input-area input[type="text"]::placeholder {
+  color: #666;
+}
+
+.input-area button {
+  background: #4a90e2;
+  border: none;
+  border-radius: 25px;
+  color: white;
+  padding: 12px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.input-area button:disabled {
+  background: #264d7d;
+  cursor: not-allowed;
+}
+.input-area button:hover:not(:disabled) {
+  background: #357ABD;
+}
+
+.typing {
+  font-style: italic;
+  opacity: 0.7;
+}
