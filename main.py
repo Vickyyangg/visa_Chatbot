@@ -57,8 +57,14 @@ def detect_interest(messages: list[str]):
             return True
     return False
 
-# ✅ Prompt builder using few-shot learning
-def build_few_shot_prompt(latest_message: str):
+# ✅ Limit how many recent messages we include for context
+MAX_CONTEXT_MESSAGES = 6
+
+# ✅ Prompt builder using few-shot learning + recent conversation context
+def build_few_shot_prompt_with_context(messages: list[str]):
+    # Grab last MAX_CONTEXT_MESSAGES messages
+    recent_msgs = messages[-MAX_CONTEXT_MESSAGES:]
+
     examples = []
     for convo_id, convo in conversations_data.items():
         msgs = convo.get("messages", [])
@@ -75,7 +81,17 @@ def build_few_shot_prompt(latest_message: str):
     prompt_text = "You are a visa support agent. Speak casually and naturally like a human — no AI tone.\nHere are some examples:\n\n"
     for cust, agent in examples:
         prompt_text += f"Customer: {cust}\nAgent: {agent}\n\n"
-    prompt_text += f"Now respond to this:\nCustomer: {latest_message}\nAgent:"
+
+    prompt_text += "Now respond to this conversation:\n"
+
+    # Format recent conversation as alternating Customer/Agent
+    for idx, msg in enumerate(recent_msgs):
+        if idx % 2 == 0:
+            prompt_text += f"Customer: {msg}\n"
+        else:
+            prompt_text += f"Agent: {msg}\n"
+
+    prompt_text += "Agent:"
 
     return prompt_text
 
@@ -90,12 +106,12 @@ async def respond(input: MessageInput):
             fallback_reply = random.choice(FALLBACK_RESPONSES)
             return {"reply": fallback_reply, "high_interest": False}
 
-        # ✅ Build few-shot prompt
-        prompt = build_few_shot_prompt(latest_message)
+        # ✅ Build few-shot prompt with recent conversation context
+        prompt = build_few_shot_prompt_with_context(input.messages)
 
         headers = {
             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "HTTP-Referer": "https://yourdomain.com",  # Optional
+            "HTTP-Referer": "https://yourdomain.com",  # Optional, update or remove
             "X-Title": "VisaBot Assistant"
         }
 
@@ -109,7 +125,7 @@ async def respond(input: MessageInput):
             "max_tokens": 300
         }
 
-        # ✅ Send request to OpenRouter
+        # Send request to OpenRouter API
         async with httpx.AsyncClient() as client:
             response = await client.post(OPENROUTER_API_URL, json=payload, headers=headers)
             response.raise_for_status()
